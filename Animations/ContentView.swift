@@ -8,24 +8,51 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var enabled = true
+    let letters = Array("Hello SwiftUI")
+    @State private var enabled = false
+    @State private var dragAmount = CGSize.zero
     
     var body: some View {
-        
-        return VStack {
-            // NOTE: Only changes that occur BEFORE the .animation() modifier actually get animated.
-            Button("Tap Me") {
-                enabled.toggle()
+        // can apply animation to each individual letter to make a Slinky-like effect when dragging the word container around.
+        HStack(spacing: 0) {
+            ForEach(0..<letters.count, id: \.self) { num in
+                Text(String(letters[num]))
+                    .padding(5)
+                    .font(.title)
+                    .background(enabled ? .blue : .red)
+                    .offset(dragAmount)
+                    .animation(.default.delay(Double(num) / 20), value: dragAmount)
             }
-            .frame(width: 200, height: 200)
-            .background(enabled ? .blue : .red)
-            // passing 'nil' as the animation disables them entirely (for changes BEFORE modifier)
-            .animation(nil, value: enabled)
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: enabled ? 60 : 0))
-            // we can have multiple animation modifiers, will only animate things after the previous animation modifier.
-            .animation(.interpolatingSpring(stiffness: 10, damping: 1), value: enabled)
         }
+        .gesture(
+            DragGesture()
+                .onChanged { dragAmount = $0.translation }
+                .onEnded { _ in
+                    dragAmount = .zero
+                    enabled.toggle()
+                }
+        )
+        /*
+        // Basic Card with drag gesture that springs back to original spot when drag ends.
+        LinearGradient(gradient: Gradient(colors: [.yellow, .red]), startPoint: .topLeading, endPoint: .bottomTrailing)
+            .frame(width: 300, height: 200)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            // offset modifier allow a View's position to change, w/o affecting other Views.
+            .offset(dragAmount)
+            // adding gesture support for a View
+            .gesture(
+                DragGesture()
+                    .onChanged { dragAmount = $0.translation }
+                    .onEnded { _ in  // remember, this says ignore args
+                        // explicit animation
+                        withAnimation(.spring()) {
+                            dragAmount = .zero
+                        }
+                    }
+            )
+        // applied animation
+//            .animation(.spring(), value: dragAmount)
+       */
     }
 }
 
