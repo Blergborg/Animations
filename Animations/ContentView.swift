@@ -8,26 +8,24 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var animationAmount = 1.0
+    @State private var animationAmount = 0.0
     
     var body: some View {
         print(animationAmount)
         return VStack {
-            // Tapping triggers animation b/c we attached a .animation() modifier to the binding variable
-            Stepper("Scale amount", value:
-                    $animationAmount.animation(), in: 1...10)
-
-            Spacer()
-
-            // Tapping button changes size immediately
+            
             Button("Tap Me") {
-                animationAmount += 1
+                // explicitly invoke the animation
+                withAnimation(.interpolatingSpring(stiffness: 5, damping: 1)) {
+                    animationAmount += 360
+                }
             }
             .padding(40)
             .background(.red)
             .foregroundColor(.white)
             .clipShape(Circle())
-            .scaleEffect(animationAmount)
+            // animation that rotates around the axis (or axies) selected by a specified radial amount
+            .rotation3DEffect(.degrees(animationAmount), axis: (x: 1, y: -1, z: 0))
         }
     }
 }
