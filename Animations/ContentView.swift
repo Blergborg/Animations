@@ -8,24 +8,23 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var animationAmount = 0.0
+    @State private var enabled = true
     
     var body: some View {
-        print(animationAmount)
+        
         return VStack {
-            
+            // NOTE: Only changes that occur BEFORE the .animation() modifier actually get animated.
             Button("Tap Me") {
-                // explicitly invoke the animation
-                withAnimation(.interpolatingSpring(stiffness: 5, damping: 1)) {
-                    animationAmount += 360
-                }
+                enabled.toggle()
             }
-            .padding(40)
-            .background(.red)
+            .frame(width: 200, height: 200)
+            .background(enabled ? .blue : .red)
+            // passing 'nil' as the animation disables them entirely (for changes BEFORE modifier)
+            .animation(nil, value: enabled)
             .foregroundColor(.white)
-            .clipShape(Circle())
-            // animation that rotates around the axis (or axies) selected by a specified radial amount
-            .rotation3DEffect(.degrees(animationAmount), axis: (x: 1, y: -1, z: 0))
+            .clipShape(RoundedRectangle(cornerRadius: enabled ? 60 : 0))
+            // we can have multiple animation modifiers, will only animate things after the previous animation modifier.
+            .animation(.interpolatingSpring(stiffness: 10, damping: 1), value: enabled)
         }
     }
 }
